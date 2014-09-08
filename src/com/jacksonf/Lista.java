@@ -1,5 +1,7 @@
 package com.jacksonf;
 
+import java.io.IOException;
+
 public class Lista {
 
 	private Nodo inicio;
@@ -10,9 +12,74 @@ public class Lista {
 		fim = null;
 	}
 
-	public void addEnd(Contato contato) {
+	public void loadFromFile() {
+		String filePath = "C:\\temp\\dados.txt";
+		Arquivo arquivo = new Arquivo(filePath);
 
-		Nodo tmp = new Nodo(contato, null, inicio);
+		try {
+
+			arquivo.openTextFile();
+			while (arquivo.next()) {
+				String Linha = arquivo.readLine();
+
+				String[] vDados = Linha.split("#");
+
+				Contato contato = new Contato();
+				contato.setNome(vDados[0]);
+				contato.setEndereco(vDados[1]);
+
+				if (vDados.length >= 3)
+					contato.setTelefone(vDados[2]);
+
+				this.adicionaOrdem(contato);
+			}
+
+			arquivo.openTextFileWriter();
+			arquivo.closeTextFile();
+
+		} catch (IOException e) {
+			System.out.println("ERRO: " + e);
+		}
+	}
+
+	public boolean vazia() {
+		return inicio == null;
+	}
+
+	public void adicionaOrdem(Contato contato) {
+		if (inicio == null) {
+			adicionaInicio(contato);
+		} else {
+			Nodo tmp = inicio;
+
+			boolean add = false;
+
+			do {
+				if (tmp.getRegistro().getNome().compareTo(contato.getNome()) > 0) {
+					if (inicio == tmp) {
+						adicionaInicio(contato);
+					} else {
+						Nodo novo = new Nodo(tmp.getAnterior(), contato, tmp);
+						tmp.getAnterior().setProximo(novo);
+						tmp.setAnterior(novo);
+					}
+
+					add = true;
+					break;
+				}
+
+				tmp = tmp.getProximo();
+
+			} while (tmp != null); // && tmp.getProximo() != null);
+
+			if (!add)
+				adicionaFim(contato);
+		}
+	}
+
+	public void adicionaFim(Contato contato) {
+
+		Nodo tmp = new Nodo(fim, contato, null);
 		if (inicio == null) {
 			inicio = tmp;
 			fim = tmp;
@@ -22,18 +89,18 @@ public class Lista {
 		}
 	}
 
-	public void addBegin(Contato contato) {
-		Nodo caixa = new Nodo(contato, inicio, null);
+	public void adicionaInicio(Contato contato) {
+		Nodo tmp = new Nodo(null, contato, inicio);
 		if (inicio == null) {
-			inicio = caixa;
-			fim = caixa;
+			inicio = tmp;
+			fim = tmp;
 		} else {
-			inicio.setAnterior(caixa);
-			inicio = caixa;
+			inicio.setAnterior(tmp);
+			inicio = tmp;
 		}
 	}
 
-	public void Show() {
+	public void showConsole() {
 		Nodo aux;
 		aux = inicio;
 		while (aux != null) {
@@ -44,7 +111,8 @@ public class Lista {
 
 	public Nodo buscaSimples(Contato elemento) {
 		Nodo p = inicio;
-		while ((p != null) && (p.getRegistro() != elemento)) {
+		while ((p != null)
+				&& (!p.getRegistro().getNome().equals(elemento.getNome()))) {
 			p = p.getProximo();
 		}
 		if ((p != null) && (p.getRegistro() == elemento))
@@ -52,17 +120,26 @@ public class Lista {
 		else
 			return null;
 	}
-	
-	private void removeListaInicio(Nodo nodo)
-	{
+
+	private void liberaNodo(Nodo nodo) {
+		nodo.setAnterior(null);
+		nodo.setProximo(null);
+		nodo = null;
+	}
+
+	private void removeInicio(Nodo nodo) {
 		inicio = nodo.getProximo();
 		nodo.getProximo().setAnterior(null);
 	}
-	
-	private void removeListaFinal(Nodo nodo)
-	{
+
+	private void removeFinal(Nodo nodo) {
 		fim = nodo.getAnterior();
 		nodo.getAnterior().setProximo(null);
+	}
+
+	private void removeMeio(Nodo nodo) {
+		nodo.getAnterior().setProximo(nodo.getProximo());
+		nodo.getProximo().setAnterior(nodo.getAnterior());
 	}
 
 	public void removeLista(Contato elemento) {
@@ -74,22 +151,20 @@ public class Lista {
 			{
 				if (pos == inicio)// se for no inicio
 				{
-					removeListaInicio(pos);
+					removeInicio(pos);
 				} else if (pos == fim)// se for no fim
 				{
-					removeListaFinal(pos);
-				} else
-				{
-					pos.getAnterior().setProximo(pos.getProximo());
-					pos.getProximo().setAnterior(pos.getAnterior());
+					removeFinal(pos);
+				} else {
+					removeMeio(pos);
 				}
-				pos.setAnterior(null);
-				pos.setProximo(null);
+				liberaNodo(pos);
+
 			} else {
 				inicio = null;
 				fim = null;
 			}
 		} else
-			System.out.println("Elemento nao encontrado");
+			System.out.println("Elemento não esta na lista");
 	}
 }

@@ -7,7 +7,7 @@ public class Contato {
 	
 	public void ShowConsole()
 	{
-		System.out.printf("Nome: %s\r\nEndereco: %s\r\nTelefone: %s\r\n", this.getNome(), this.getEndereco(), this.getTelefone());
+		System.out.printf("Nome: %s\tEndereco: %s\tTelefone: %s\r\n", this.getNome(), this.getEndereco(), this.getTelefone());
 	}
 	
 	public String getNome() {

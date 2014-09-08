@@ -7,7 +7,7 @@ public class Nodo {
 	
 	
 	
-	public Nodo(Contato registro, Nodo proximo, Nodo anterior) {
+	public Nodo(Nodo anterior, Contato registro, Nodo proximo) {
 		super();
 		this.registro = registro;
 		this.proximo = proximo;
